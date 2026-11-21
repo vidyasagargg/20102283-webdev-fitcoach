@@ -1,0 +1,31 @@
+# Render Blueprint: one web service that serves the API and the built React app.
+# MongoDB is hosted on MongoDB Atlas (free M0 cluster); paste its URI as MONGODB_URI.
+services:
+  - type: web
+    name: fitcoach
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeployTrigger: checksPass # deploy main only after GitHub Actions CI passes
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 22
+      - key: DATA_STORE
+        value: mongo
+      - key: MONGODB_URI
+        sync: false # set in the Render dashboard (secret)
+      - key: JWT_SECRET
+        generateValue: true # Render generates a strong random secret
+      - key: CLIENT_ORIGIN
+        sync: false # e.g. https://fitcoach.onrender.com
+      - key: USDA_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: ADMIN_EMAILS
+        sync: false
