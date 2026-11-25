@@ -12,7 +12,7 @@ export default function OnboardingPage() {
   const navigate = useNavigate();
   const p = user.profile;
   const [f, setF] = useState({
-    age: p.age ?? '',
+    age: 0,
     heightCm: p.heightCm ?? '',
     startDate: p.schedule?.cycleStart ?? todayIso(),
     weightKg: p.baseline?.weightKg ?? '',
@@ -40,7 +40,7 @@ export default function OnboardingPage() {
     try {
       await saveProfile({
         profile: {
-          age: numOrNull(f?.age??0),
+          age: 0,
           heightCm: numOrNull(f.heightCm),
           dietNotes: f.dietNotes,
           startDate: f.startDate,
@@ -74,7 +74,7 @@ export default function OnboardingPage() {
       <form onSubmit={submit} className="stack">
         <Card title="About you">
           <div className="grid-3">
-            <Field label="Age" type="number" inputMode="numeric" value={f?.age ?? 0} onChange={set('age')} error={errors.age} />
+            <Field label="Age" type="number" inputMode="numeric" value={ 0} onChange={set('age')} error={errors.age} />
             <Field label="Height" suffix="cm" type="number" inputMode="decimal" value={f.heightCm} onChange={set('heightCm')} error={errors.heightCm} />
             <Field label="Plan start date" type="date" value={f.startDate} onChange={set('startDate')} hint="Day 1 of your training cycle" />
           </div>
