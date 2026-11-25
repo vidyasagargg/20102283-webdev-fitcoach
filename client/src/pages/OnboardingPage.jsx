@@ -40,7 +40,7 @@ export default function OnboardingPage() {
     try {
       await saveProfile({
         profile: {
-          age: numOrNull(f.age),
+          age: numOrNull(f?.age??0),
           heightCm: numOrNull(f.heightCm),
           dietNotes: f.dietNotes,
           startDate: f.startDate,
@@ -74,7 +74,7 @@ export default function OnboardingPage() {
       <form onSubmit={submit} className="stack">
         <Card title="About you">
           <div className="grid-3">
-            <Field label="Age" type="number" inputMode="numeric" value={f.age} onChange={set('age')} error={errors.age} />
+            <Field label="Age" type="number" inputMode="numeric" value={f?.age ?? 0} onChange={set('age')} error={errors.age} />
             <Field label="Height" suffix="cm" type="number" inputMode="decimal" value={f.heightCm} onChange={set('heightCm')} error={errors.heightCm} />
             <Field label="Plan start date" type="date" value={f.startDate} onChange={set('startDate')} hint="Day 1 of your training cycle" />
           </div>
