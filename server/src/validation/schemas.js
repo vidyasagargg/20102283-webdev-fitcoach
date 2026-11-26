@@ -96,7 +96,7 @@ export const profileSchema = z
         schedule: z
           .object({
             cycleStart: isoDate.optional(),
-            cycle: z.array(text(40).min(1)).min(1).max(14).optional(),
+            cycle: z.array(text(40).min(1)).max(14).optional(),
           })
           .strict()
           .optional(),
