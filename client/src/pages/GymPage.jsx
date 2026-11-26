@@ -7,6 +7,16 @@ import WorkoutEditor from '../components/WorkoutEditor.jsx';
 import Icon from '../components/Icon.jsx';
 import { fmtShort } from '../utils/dates.js';
 
+const WORKOUT_EXAMPLE = `Legs 1
+Smith machine squat
+17.5 kg x 10
+17.5 kg x 9
+
+Leg press
+60 kg x 12
+
+Treadmill 20 min speed 4.5 incline 5`;
+
 const toEditable = (w) => ({
   ...w,
   durationMin: w.durationMin ?? '',
@@ -141,9 +151,16 @@ export default function GymPage() {
                 rows={10}
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                placeholder={'Legs 1 - 19 Oct\nSmith squat\n1. 17.5kg ~ 10 reps\n2. 17.5kg ~ 9 reps\nLeg press 60kg x 12\nTreadmill 20 min speed 4.5 incline 5'}
-                hint="Your own format works: numbered sets, kg ~ reps, drop sets with +, warm-ups, 3x12 @ 20kg, cardio lines."
+                placeholder="Paste or type your workout notes"
+                hint="Write each exercise name on its own line, then one set per line as weight x reps. The example uses the date selected in Gym."
               />
+              <details className="workout-example">
+                <summary>Example workout format</summary>
+                <pre>{WORKOUT_EXAMPLE}</pre>
+                <Button type="button" variant="secondary" size="sm" disabled={Boolean(text.trim())} onClick={() => setText(WORKOUT_EXAMPLE)}>
+                  Use example
+                </Button>
+              </details>
               <div className="btn-row">
                 <Button onClick={convert} busy={busy} disabled={!text.trim()} icon="spark">
                   Convert to app format

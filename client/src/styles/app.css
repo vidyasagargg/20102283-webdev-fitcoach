@@ -239,6 +239,18 @@ main {
 .admin-email {
   overflow-wrap: anywhere;
 }
+.workout-example summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.workout-example pre {
+  margin: 8px 0;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
 .admin-member-details {
   border-top: 1px solid var(--border);
   margin-top: 16px;
