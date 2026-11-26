@@ -8,7 +8,9 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
-    setUser(await api.get('/profile'));
+    const currentUser = await api.get('/profile');
+    setUser(currentUser);
+    return currentUser;
   }, []);
 
   useEffect(() => {
@@ -25,11 +27,11 @@ export function AuthProvider({ children }) {
       refresh,
       async login(email, password) {
         await api.post('/auth/login', { email, password });
-        await refresh();
+        return refresh();
       },
       async register(name, email, password) {
         await api.post('/auth/register', { name, email, password });
-        await refresh();
+        return refresh();
       },
       async logout() {
         await api.post('/auth/logout').catch(() => {});

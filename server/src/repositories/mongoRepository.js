@@ -34,10 +34,10 @@ export class MongoRepository {
     return toPlain(doc.toObject());
   }
 
-  async find(filter = {}, { sort = { date: 1 }, limit = 0 } = {}) {
+  async find(filter = {}, { sort = { date: 1 }, limit = 0, skip = 0 } = {}) {
     const f = toMongoFilter(filter);
     if (!f) return [];
-    const docs = await this.Model.find(f).sort(sort).limit(limit).lean();
+    const docs = await this.Model.find(f).sort(sort).skip(skip).limit(limit).lean();
     return docs.map(toPlain);
   }
 
@@ -47,10 +47,11 @@ export class MongoRepository {
     return toPlain(await this.Model.findOne(f).lean());
   }
 
-  async updateOne(filter, patch) {
+  async updateOne(filter, patch, { increment } = {}) {
     const f = toMongoFilter(filter);
     if (!f) return null;
-    const doc = await this.Model.findOneAndUpdate(f, { $set: patch }, { new: true, runValidators: true }).lean();
+    const update = { $set: patch, ...(increment && { $inc: increment }) };
+    const doc = await this.Model.findOneAndUpdate(f, update, { new: true, runValidators: true }).lean();
     return toPlain(doc);
   }
 

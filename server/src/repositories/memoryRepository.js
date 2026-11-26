@@ -62,7 +62,7 @@ export class MemoryRepository {
     return clone(doc);
   }
 
-  async find(filter = {}, { sort = { date: 1 }, limit = 0 } = {}) {
+  async find(filter = {}, { sort = { date: 1 }, limit = 0, skip = 0 } = {}) {
     let out = [...this.docs.values()].filter((d) => matches(d, filter));
     const keys = Object.entries(sort);
     if (keys.length) {
@@ -75,8 +75,7 @@ export class MemoryRepository {
         return a.createdAt < b.createdAt ? -1 : 1;
       });
     }
-    if (limit) out = out.slice(0, limit);
-    return out.map(clone);
+    return out.slice(skip, limit ? skip + limit : undefined).map(clone);
   }
 
   async findOne(filter) {
@@ -84,10 +83,13 @@ export class MemoryRepository {
     return doc ? clone(doc) : null;
   }
 
-  async updateOne(filter, patch) {
+  async updateOne(filter, patch, { increment = {} } = {}) {
     const doc = [...this.docs.values()].find((d) => matches(d, filter));
     if (!doc) return null;
     const next = { ...doc, ...clone(patch), updatedAt: new Date().toISOString() };
+    for (const [field, amount] of Object.entries(increment)) {
+      next[field] = (next[field] ?? 0) + amount;
+    }
     this.#checkUnique(next, doc.id);
     this.docs.set(doc.id, next);
     return clone(next);

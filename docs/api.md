@@ -64,6 +64,9 @@ Each supports `GET /?date=` or `GET /?from=&to=`, `GET /:id`, `POST /`, `PUT /:i
 | GET | `/export/data.json` | All of the user's data |
 | GET | `/export/reminders.ics?tz&days&start` | iCalendar reminders (RFC 5545) |
 | GET | `/admin/stats` | Admin role only: document counts, no personal data |
+| GET | `/admin/users` | Admin role only. Paginated account summaries with optional exact `email` and `page` query parameters |
+| GET | `/admin/users/:id` | Admin role only. Account summary and counts of associated activity records |
+| POST | `/admin/users/:id/actions` | Admin role only. `action` is `suspend`, `reactivate`, or `revoke-sessions`. Applies to regular accounts |
 | GET | `/health` | Liveness and database status (used by Render) |
 
 ## Example

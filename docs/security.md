@@ -8,7 +8,7 @@ has an automated test in `server/tests/auth.security.test.js` unless noted.
 |---|---|---|---|
 | **A01 Broken access control** | User B reads or edits User A's meals by guessing an id (IDOR) | Every query is scoped by `userId` from the session; other users' ids return **404**, not 403, so ids cannot be probed | `routes/ownedResource.js` ✔ tested |
 | | Privilege escalation via `role` in the request body | Strict Zod schemas reject unknown keys (mass-assignment); role is set only on the server | `validation/schemas.js` ✔ tested |
-| | Non-admin reaches admin routes | `requireRole('admin')`; admin sees counts only | `middleware/auth.js` ✔ tested |
+| | Non-admin reaches admin routes | `requireRole('admin')` protects account summaries, activity counts and account support actions | `middleware/auth.js` ✔ tested |
 | | CSRF: another site posts to the API with the user's cookie | `SameSite=Strict` cookie **and** a required custom header (`X-Requested-With`), which cross-site forms cannot send without a CORS preflight; CORS allows only configured origins | `middleware/security.js` ✔ tested |
 | **A02 Cryptographic failures** | Password database leak | bcrypt with 12 rounds (adaptive, salted); hashes are never returned by the API | `routes/auth.routes.js` ✔ tested |
 | | Token theft in transit | HTTPS only (Render TLS); `Secure` cookie in production; HSTS via Helmet | `middleware/auth.js`, Helmet |

@@ -25,7 +25,8 @@ import {
   waterRouter,
   measurementsRouter,
 } from './routes/tracking.routes.js';
-import { coachRouter, progressRouter, exportRouter, adminRouter } from './routes/insights.routes.js';
+import { coachRouter, progressRouter, exportRouter } from './routes/insights.routes.js';
+import { adminRouter } from './routes/admin.routes.js';
 import { createDayDataService } from './services/dayData.service.js';
 import { createNutritionService } from './services/nutrition/index.js';
 import { createUsdaClient } from './services/nutrition/usdaClient.js';

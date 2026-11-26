@@ -21,7 +21,7 @@ const schema = z.object({
   USDA_API_URL: z.string().url().default('https://api.nal.usda.gov/fdc/v1'),
   ANTHROPIC_API_KEY: z.string().optional(),
   ANTHROPIC_MODEL: z.string().default('claude-haiku-5-5'),
-  // Comma-separated emails that are given the admin role on registration
+  // Development/test only: emails that are given the admin role on registration
   ADMIN_EMAILS: z.string().default(''),
   BCRYPT_ROUNDS: z.coerce.number().int().min(4).max(15).default(12),
   SERVE_CLIENT: z

@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import { validate } from '../middleware/validate.js';
 import { issueSession, clearSession, requireAuth } from '../middleware/auth.js';
 import { authLimiter } from '../middleware/security.js';
-import { asyncHandler, conflict, unauthorized, badRequest } from '../utils/httpError.js';
+import { asyncHandler, conflict, unauthorized, badRequest, forbidden } from '../utils/httpError.js';
 import { registerSchema, loginSchema, changePasswordSchema, isoDate } from '../validation/schemas.js';
 import { todayIso } from '../utils/dates.js';
 
@@ -30,7 +30,7 @@ export function authRouter({ repos, config }) {
         name,
         email,
         passwordHash: await bcrypt.hash(password, config.BCRYPT_ROUNDS),
-        role: config.adminEmails.includes(email) ? 'admin' : 'user',
+        role: !config.isProd && config.adminEmails.includes(email) ? 'admin' : 'user',
         tokenVersion: 0,
         profile: { startDate, schedule: { cycleStart: startDate }, onboarded: false },
       });
@@ -48,6 +48,7 @@ export function authRouter({ repos, config }) {
       const user = await repos.users.findOne({ email });
       const ok = await bcrypt.compare(password, user?.passwordHash ?? DUMMY_HASH);
       if (!user || !ok) throw unauthorized('Email or password is incorrect');
+      if (user.suspended) throw forbidden('This account is suspended. Contact support.');
       issueSession(res, user, config);
       res.json(publicUser(user));
     }),
@@ -67,7 +68,7 @@ export function authRouter({ repos, config }) {
     '/logout-all',
     auth,
     asyncHandler(async (req, res) => {
-      await repos.users.updateOne({ id: req.user.id }, { tokenVersion: (req.user.tokenVersion ?? 0) + 1 });
+      await repos.users.updateOne({ id: req.user.id }, {}, { increment: { tokenVersion: 1 } });
       clearSession(res, config);
       res.status(204).end();
     }),
@@ -84,9 +85,11 @@ export function authRouter({ repos, config }) {
         throw badRequest('Current password is incorrect', { currentPassword: 'Current password is incorrect' });
       }
       const updated = await repos.users.updateOne(
-        { id: req.user.id },
-        { passwordHash: await bcrypt.hash(newPassword, config.BCRYPT_ROUNDS), tokenVersion: (req.user.tokenVersion ?? 0) + 1 },
+        { id: req.user.id, passwordHash: req.user.passwordHash, suspended: { $ne: true } },
+        { passwordHash: await bcrypt.hash(newPassword, config.BCRYPT_ROUNDS) },
+        { increment: { tokenVersion: 1 } },
       );
+      if (!updated) throw conflict('The account changed. Sign in again before retrying.');
       issueSession(res, updated, config); // keep this device signed in, sign out the rest
       res.status(204).end();
     }),

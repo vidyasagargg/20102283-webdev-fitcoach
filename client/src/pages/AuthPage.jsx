@@ -24,9 +24,10 @@ export default function AuthPage({ mode }) {
     setBusy(true);
     setErrors({});
     try {
-      if (isLogin) await login(form.email, form.password);
-      else await register(form.name, form.email, form.password);
-      navigate(location.state?.from?.pathname ?? '/', { replace: true });
+      const user = isLogin
+        ? await login(form.email, form.password)
+        : await register(form.name, form.email, form.password);
+      navigate(location.state?.from?.pathname ?? (user.role === 'admin' ? '/admin' : '/'), { replace: true });
     } catch (err) {
       setErrors({ ...err.fields, _form: err.message });
     } finally {

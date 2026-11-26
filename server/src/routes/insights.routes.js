@@ -1,8 +1,7 @@
-/** Coach reviews, progress analytics, data export and admin routes. */
+/** Coach reviews, progress analytics and data export routes. */
 import { Router } from 'express';
 import { z } from 'zod';
 import { validate } from '../middleware/validate.js';
-import { requireRole } from '../middleware/auth.js';
 import { asyncHandler, badRequest } from '../utils/httpError.js';
 import { isoDate } from '../validation/schemas.js';
 import { addDays, diffDays, todayIso } from '../utils/dates.js';
@@ -113,20 +112,5 @@ export function exportRouter({ repos }) {
     },
   );
 
-  return router;
-}
-
-/** Admin: aggregate usage only. Admins cannot read anyone's health data. */
-export function adminRouter({ repos }) {
-  const router = Router();
-  router.use(requireRole('admin'));
-  router.get(
-    '/stats',
-    asyncHandler(async (_req, res) => {
-      const counts = {};
-      for (const c of COLLECTIONS) counts[c] = await repos[c].count({});
-      res.json({ counts, generatedAt: new Date().toISOString() });
-    }),
-  );
   return router;
 }

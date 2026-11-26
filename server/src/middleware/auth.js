@@ -45,7 +45,7 @@ export function requireAuth({ repos, config }) {
         throw unauthorized('Your session has expired. Please sign in again.');
       }
       const user = await repos.users.findOne({ id: payload.sub });
-      if (!user || (user.tokenVersion ?? 0) !== payload.v) {
+      if (!user || user.suspended || (user.tokenVersion ?? 0) !== payload.v) {
         throw unauthorized('Your session has expired. Please sign in again.');
       }
       req.user = user;

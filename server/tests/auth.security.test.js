@@ -131,6 +131,38 @@ describe('security controls', () => {
     expect(res.body.counts.users).toBeGreaterThan(0);
   });
 
+  it('lets admins investigate account activity and revoke or restore account access', async () => {
+    const member = await signedInAgent(app);
+    const admin = await signedInAgent(app);
+    await repos.users.updateOne({ id: admin.user.id }, { role: 'admin' });
+    const account = `/api/admin/users/${member.user.id}`;
+    const actions = `${account}/actions`;
+    await api(member.agent).post('/api/water', { date: '2026-10-11', ml: 500 }).expect(201);
+
+    await member.agent.get('/api/admin/users').expect(403);
+    await member.agent.get(account).expect(403);
+    await api(member.agent).post(actions, { action: 'suspend' }).expect(403);
+    const list = await admin.agent.get('/api/admin/users').query({ email: member.user.email }).expect(200);
+    expect(list.headers['cache-control']).toBe('no-store');
+    expect(list.body).toMatchObject({ page: 1, pageSize: 25, total: 1, users: [{ id: member.user.id }] });
+    expect(list.body.users[0]).not.toHaveProperty('passwordHash');
+    expect(list.body.users[0]).not.toHaveProperty('profile');
+    const detail = await admin.agent.get(account).expect(200);
+    expect(detail.body.counts.water).toBe(1);
+    await api(admin.agent).post(`/api/admin/users/${admin.user.id}/actions`, { action: 'suspend' }).expect(403);
+
+    const login = () => api(member.agent).post('/api/auth/login', { email: member.credentials.email, password: member.credentials.password });
+    await api(admin.agent).post(actions, { action: 'revoke-sessions' }).expect(200);
+    await member.agent.get('/api/profile').expect(401);
+    await login().expect(200);
+    await api(admin.agent).post(actions, { action: 'suspend' }).expect(200);
+    await member.agent.get('/api/profile').expect(401);
+    await login().expect(403);
+    await api(admin.agent).post(actions, { action: 'reactivate' }).expect(200);
+    await member.agent.get('/api/profile').expect(401);
+    await login().expect(200);
+  });
+
   it('returns JSON 400 for malformed JSON', async () => {
     const res = await request(app)
       .post('/api/auth/login')

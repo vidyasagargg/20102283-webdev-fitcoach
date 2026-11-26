@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { matchPath, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { UiProvider } from './context/UiContext.jsx';
 import AppShell from './components/AppShell.jsx';
@@ -14,12 +14,16 @@ const WaterPage = lazy(() => import('./pages/WaterPage.jsx'));
 const ProgressPage = lazy(() => import('./pages/ProgressPage.jsx'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage.jsx'));
 const OnboardingPage = lazy(() => import('./pages/OnboardingPage.jsx'));
+const AdminPage = lazy(() => import('./pages/AdminPage.jsx'));
 
 function Protected({ children }) {
   const { user, loading } = useAuth();
   const location = useLocation();
   if (loading) return <Loader label="Loading your coach" />;
   if (!user) return <Navigate to="/login" replace state={{ from: location }} />;
+  if (matchPath('/admin', location.pathname)) {
+    return user.role === 'admin' ? children : <Navigate to="/" replace />;
+  }
   if (!user.profile?.onboarded && location.pathname !== '/welcome') return <Navigate to="/welcome" replace />;
   return children;
 }
@@ -27,7 +31,7 @@ function Protected({ children }) {
 function PublicOnly({ children }) {
   const { user, loading } = useAuth();
   if (loading) return <Loader />;
-  return user ? <Navigate to="/" replace /> : children;
+  return user ? <Navigate to={user.role === 'admin' ? '/admin' : '/'} replace /> : children;
 }
 
 export default function App() {
@@ -46,6 +50,7 @@ export default function App() {
               <Route path="water" element={<WaterPage />} />
               <Route path="progress" element={<ProgressPage />} />
               <Route path="settings" element={<SettingsPage />} />
+              <Route path="admin" element={<AdminPage />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

@@ -44,20 +44,15 @@ Commit in small, meaningful steps as you continue to work on the project; the br
 | `CLIENT_ORIGIN` | your Render URL, e.g. `https://fitcoach-xxxx.onrender.com` |
 | `USDA_API_KEY` | free key from <https://fdc.nal.usda.gov/api-key-signup> (or `DEMO_KEY`) |
 | `ANTHROPIC_API_KEY` | optional: leave empty to use the rule-based coach |
-| `ADMIN_EMAILS` | optional: your email, to get the admin role when you register |
 
 4. Deploy. When the log shows `Connected to MongoDB` and `listening`, open the URL.
 5. **Settings → Build & Deploy → Auto-Deploy: "After CI checks pass"** so only tested commits go live.
 
-## 4. Seed the demo account (optional, for the presentation)
+## 4. Provision an administrator or run the local demo
 
-From your machine, with `MONGODB_URI` pointing at Atlas:
+In production, have the intended administrator create an account through the normal sign-up. Verify ownership, then update that account's `role` to `admin` in Atlas. Sign in to open `/admin`. Public sign-up creates regular production accounts regardless of `ADMIN_EMAILS`.
 
-```bash
-MONGODB_URI="mongodb+srv://..." npm run seed -w server
-```
-
-Then sign in with `demo@fitcoach.app`, `priya@fitcoach.app`, `arjun@fitcoach.app` or `admin@fitcoach.app`, all with password `DemoPass123`.
+Run `npm run demo` to try the portal with `admin@fitcoach.app` and password `DemoPass123` in the local in-memory demo. Demo administrator addresses are blocked from the production admin API.
 
 ## 5. Smoke test after each deploy
 

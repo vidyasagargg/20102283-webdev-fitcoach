@@ -41,6 +41,7 @@ export default function AppShell() {
             <Icon name="settings" />
             <span>Settings</span>
           </NavLink>
+          {user?.role === 'admin' && <NavLink to="/admin" className="side-link">Admin portal</NavLink>}
         </nav>
         <p className="side-user">Signed in as {user?.name}</p>
       </aside>
@@ -55,6 +56,7 @@ export default function AppShell() {
           <NavLink to={`/settings${search}`} className="icon-btn topbar-settings" aria-label="Settings">
             <Icon name="settings" />
           </NavLink>
+          {user?.role === 'admin' && <NavLink to="/admin">Admin</NavLink>}
         </header>
         <main id="main" tabIndex={-1}>
           <Outlet />

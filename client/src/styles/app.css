@@ -212,6 +212,33 @@ main {
   gap: 12px;
   flex-wrap: wrap;
 }
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(125px, 1fr));
+  gap: 10px;
+}
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 8px;
+  margin-block: 12px;
+}
+.admin-users {
+  list-style: none;
+  padding: 0;
+}
+.admin-users li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-block: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.admin-email {
+  overflow-wrap: anywhere;
+}
 .eyebrow {
   font-size: 0.8rem;
   font-weight: 600;
