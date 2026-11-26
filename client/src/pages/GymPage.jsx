@@ -29,13 +29,14 @@ export default function GymPage() {
   if (plan.error || list.error) return <ErrorState error={plan.error || list.error} onRetry={() => (plan.reload(), list.reload())} />;
   const day = plan.data;
   const workouts = list.data ?? [];
+  const hasPlannedExercises = day.exercises.length > 0;
   const mainLifts = day.exercises.filter((e) => e.main).map((e) => e.name);
 
-  function startFromPlan() {
+  function startSetBySet() {
     setWarnings([]);
     setDraft({
       date,
-      session: day.session,
+      session: day.session ?? 'Other',
       durationMin: '',
       feeling: '',
       notes: '',
@@ -45,7 +46,7 @@ export default function GymPage() {
         hint: e.suggestion?.reason ?? `New exercise: pick a weight where the last 2 of ${e.reps} reps are hard.`,
         sets: Array.from({ length: e.sets }, () => ({ type: 'working', weightKg: e.suggestion?.weightKg ?? '', reps: '', done: false })),
       })),
-      cardio: day.cardio ? [{ type: 'Treadmill', minutes: 20, speed: 4.5, incline: 5 }] : [],
+      cardio: hasPlannedExercises && day.cardio ? [{ type: 'Treadmill', minutes: 20, speed: 4.5, incline: 5 }] : [],
     });
     setMode('edit');
   }
@@ -166,10 +167,10 @@ export default function GymPage() {
                   <span>Minutes, speed and incline</span>
                 </button>
               ) : (
-                <button className="choice" onClick={startFromPlan} disabled={!day.exercises.length}>
+                <button className="choice" onClick={startSetBySet}>
                   <Icon name="gym" size={26} />
                   <strong>Log set by set</strong>
-                  <span>Today’s plan with suggested weights and a rest timer</span>
+                  <span>{hasPlannedExercises ? 'Planned exercises with suggested weights and a rest timer' : 'Add your own exercises and sets'}</span>
                 </button>
               )}
             </div>
