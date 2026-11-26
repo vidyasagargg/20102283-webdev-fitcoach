@@ -19,10 +19,17 @@ export const fakeUsda = {
 export async function buildTestApp() {
   const useMongo = Boolean(process.env.TEST_MONGODB_URI);
   const config = loadConfig({ NODE_ENV: 'test', DATA_STORE: useMongo ? 'mongo' : 'memory', BCRYPT_ROUNDS: '4', ADMIN_EMAILS: 'admin@test.dev', SERVE_CLIENT: 'false' });
-  if (useMongo && mongoose.connection.readyState !== 1) {
-    await mongoose.connect(process.env.TEST_MONGODB_URI);
-    await mongoose.connection.db.dropDatabase();
+  //if (useMongo && mongoose.connection.readyState !== 1) {
+   // await mongoose.connect(process.env.TEST_MONGODB_URI);
+   // await mongoose.connection.db.dropDatabase();
+  //}
+
+    if (useMongo && mongoose.connection.readyState !== 1) {
+    // Test files run in parallel: each gets its own database so none wipes another's data
+    const dbName = `fitcoach_test_${process.pid}_${Math.random().toString(36).slice(2, 8)}`;
+    await mongoose.connect(process.env.TEST_MONGODB_URI, { dbName });
   }
+
   const repos = await createRepositories(config.DATA_STORE);
   const app = createApp({ config, repos, usda: fakeUsda, aiCoach: null });
   return { app, repos, config };
@@ -47,6 +54,13 @@ export const api = (agent) => ({
   del: (url) => agent.delete(url).set('X-Requested-With', 'fitcoach'),
 });
 
+//export const closeDb = async () => {
+//  if (mongoose.connection.readyState === 1) await mongoose.disconnect();
+//};
+
 export const closeDb = async () => {
-  if (mongoose.connection.readyState === 1) await mongoose.disconnect();
+  if (mongoose.connection.readyState === 1) {
+    await mongoose.connection.db.dropDatabase(); // clean up this file's test database
+    await mongoose.disconnect();
+  }
 };
