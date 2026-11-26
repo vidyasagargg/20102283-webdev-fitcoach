@@ -66,6 +66,7 @@ const UserSchema = new Schema(
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
     tokenVersion: { type: Number, default: 0 },
     suspended: { type: Boolean, default: false },
+    sampleData: { type: Boolean, default: false },
     profile: ProfileSchema,
   },
   opts,

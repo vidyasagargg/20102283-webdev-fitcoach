@@ -54,6 +54,8 @@ In production, have the intended administrator create an account through the nor
 
 Run `npm run demo` to try the portal with `admin@fitcoach.app` and password `DemoPass123` in the local in-memory demo. Demo administrator addresses are blocked from the production admin API.
 
+To add the 20 synthetic members and the dedicated `vidyaadmin@fitcoach.app` administrator to `fitcoach_dev`, supply `FITCOACH_SEED_MONGODB_URI` and `FITCOACH_SEED_ADMIN_PASSWORD` in the process environment or the ignored `server/.env.seed` file, then run `npm run seed:production -w server`. The seed preserves existing accounts and skips sample members it already created. Run it from a host that Atlas allows to connect.
+
 ## 5. Smoke test after each deploy
 
 - `GET https://<app>/api/health` → `{"status":"ok","db":true}`

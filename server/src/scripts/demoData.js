@@ -131,6 +131,8 @@ const ADMIN = { name: 'Admin', email: 'admin@fitcoach.app' };
 
 export const DEMO_ACCOUNTS = [...PERSONAS.map((p) => p.email), ADMIN.email];
 
+export const SAMPLE_MEMBER_COUNT = 20;
+
 async function removeAccount(repos, email) {
   const existing = await repos.users.findOne({ email });
   if (!existing) return;
@@ -141,7 +143,6 @@ async function removeAccount(repos, email) {
 }
 
 async function seedPersona(repos, p, { passwordHash, nutrition, coach }) {
-  await removeAccount(repos, p.email);
   const today = todayIso();
   const start = addDays(today, -p.days);
   const r = rng(p.seed);
@@ -152,6 +153,7 @@ async function seedPersona(repos, p, { passwordHash, nutrition, coach }) {
     email: p.email,
     passwordHash,
     role: 'user',
+    ...(p.sampleData && { sampleData: true }),
     tokenVersion: 0,
     profile: {
       ...p.profile,
@@ -239,11 +241,14 @@ async function seedPersona(repos, p, { passwordHash, nutrition, coach }) {
     }
   }
 
-  // Coach reviews: the last three days and the last two Saturdays
-  for (let d = 3; d >= 1; d--) await coach.daily(user, addDays(today, -d));
-  const lastSat = addDays(today, -((weekday(today) + 1) % 7));
-  await coach.weekly(user, addDays(lastSat, -7));
-  await coach.weekly(user, lastSat);
+  // Generate reports for the local demo. The production sample seed writes each
+  // member transactionally, where the report service's parallel reads cannot run.
+  if (coach) {
+    for (let d = 3; d >= 1; d--) await coach.daily(user, addDays(today, -d));
+    const lastSat = addDays(today, -((weekday(today) + 1) % 7));
+    await coach.weekly(user, addDays(lastSat, -7));
+    await coach.weekly(user, lastSat);
+  }
   return user;
 }
 
@@ -253,7 +258,10 @@ export async function seedDemo(repos, { rounds = 10 } = {}) {
   const coach = createCoachService({ repos, dayData: createDayDataService(repos), aiCoach: null });
 
   const users = [];
-  for (const p of PERSONAS) users.push(await seedPersona(repos, p, { passwordHash, nutrition, coach }));
+  for (const p of PERSONAS) {
+    await removeAccount(repos, p.email);
+    users.push(await seedPersona(repos, p, { passwordHash, nutrition, coach }));
+  }
 
   await removeAccount(repos, ADMIN.email);
   users.push(
@@ -267,4 +275,29 @@ export async function seedDemo(repos, { rounds = 10 } = {}) {
     }),
   );
   return users;
+}
+
+export async function seedSampleMembers(repos, { passwordHash, transaction }) {
+  const nutrition = createNutritionService({ usda: null });
+  let created = 0;
+
+  for (let index = 0; index < SAMPLE_MEMBER_COUNT; index++) {
+    const template = PERSONAS[index % PERSONAS.length];
+    const number = String(index + 1).padStart(2, '0');
+    const name = `Sample Member ${number}`;
+    const email = `sample-member-${number}@fitcoach.example`;
+    const inserted = await transaction(async () => {
+      const existing = await repos.users.findOne({ email });
+      if (existing) {
+        if (!existing.sampleData || existing.role !== 'user') throw new Error(`Sample member address already in use: ${email}`);
+        return false;
+      }
+      await seedPersona(repos, {
+        ...template, name, email, days: 14 + index % 7, seed: 1000 + index * 17, sampleData: true,
+      }, { passwordHash, nutrition });
+      return true;
+    });
+    if (inserted) created++;
+  }
+  return created;
 }
