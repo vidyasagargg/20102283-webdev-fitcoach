@@ -50,9 +50,9 @@ const ProfileSchema = new Schema(
     },
     schedule: {
       cycleStart: String,
-      cycle: [String],
+      cycle: { type: [String], default: undefined },
     },
-    reminders: [{ label: String, time: String, _id: false }],
+    reminders: { type: [{ label: String, time: String, _id: false }], default: undefined },
     onboarded: Boolean,
   },
   { _id: false },
