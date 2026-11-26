@@ -8,18 +8,13 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
-    try {
-      setUser(await api.get('/profile'));
-    } catch {
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
+    setUser(await api.get('/profile'));
   }, []);
 
   useEffect(() => {
     setUnauthorizedHandler(() => setUser(null));
-    refresh();
+    refresh().catch(() => setUser(null)).finally(() => setLoading(false));
+    return () => setUnauthorizedHandler(() => {});
   }, [refresh]);
 
   const value = useMemo(

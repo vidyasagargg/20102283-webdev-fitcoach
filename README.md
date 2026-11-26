@@ -52,7 +52,7 @@ cloud web service.
 
 ## Quick start
 
-Requirements: Node.js 20+ and either MongoDB running locally or a free MongoDB Atlas cluster.
+Use Node.js 22 to match CI and Render. For persistent local development, run MongoDB locally or connect to MongoDB Atlas.
 
 ```bash
 git clone https://github.com/<you>/fitcoach.git

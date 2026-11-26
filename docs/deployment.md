@@ -26,8 +26,8 @@ Commit in small, meaningful steps as you continue to work on the project; the br
 ## 2. Create the database (MongoDB Atlas)
 
 1. Sign up at <https://www.mongodb.com/cloud/atlas> and create a free **M0** cluster (pick a region near your Render region, e.g. Frankfurt).
-2. **Database Access** → *Add New Database User* → username `fitcoach`, a generated password, role *Read and write to any database*.
-3. **Network Access** → *Add IP Address* → `0.0.0.0/0` (Render free instances have no fixed IP; access is still protected by TLS and the password).
+2. **Database Access** → *Add New Database User* → use a generated password and grant the `readWrite` role on the `fitcoach` database.
+3. **Network Access** → *Add IP Address* → add the CIDR ranges listed in **Connect → Outbound** for the actual Render service. See [Render outbound IP documentation](https://render.com/docs/outbound-ip-addresses).
 4. **Connect** → *Drivers* → copy the URI and add the database name:
    `mongodb+srv://fitcoach:<password>@cluster0.xxxxx.mongodb.net/fitcoach?retryWrites=true&w=majority`
 
@@ -81,8 +81,9 @@ Then sign in with `demo@fitcoach.app`, `priya@fitcoach.app`, `arjun@fitcoach.app
 The recommended set-up is one Render service (above). If the React app must be hosted on Vercel:
 
 - `client/vercel.json` forwards every `/api/...` request to the Render service, so the browser still sees one site. The login cookie stays first-party, and `SameSite=Strict` keeps working.
-- Vercel project settings: **Root Directory** `client`, **Framework** Vite, **Build Command** `npm run build`, **Output Directory** `dist`.
-- On Render, set `CLIENT_ORIGIN` to the Vercel address, and `TRUST_PROXY` to `2` (Vercel, then Render's own proxy), so rate limits use each user's real IP address.
+- In Vercel, use root directory `client`, framework Vite, build command `npm run build`, and output directory `dist`. Vercel uses the npm workspace lockfile at the repository root.
+- Confirm that the rewrite in `client/vercel.json` matches the Render service URL. After deployment, check `/api/health` through Vercel and verify that sign-in persists when the page reloads.
+- For local development, Vite proxies to `http://127.0.0.1:4000`. If you change the API port, set `FITCOACH_API_TARGET` in `client/.env.local` to the corresponding URL and restart Vite.
 
 ## Alternative: Docker
 

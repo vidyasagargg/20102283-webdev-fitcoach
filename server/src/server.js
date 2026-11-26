@@ -28,7 +28,12 @@ if (config.DATA_STORE === 'memory' && process.env.SEED_DEMO === 'true') {
   await seedDemo(repos);
   console.log(`Demo accounts (password ${DEMO_PASSWORD}): ${DEMO_ACCOUNTS.join(', ')}`);
 }
-const healthCheck = async () => (config.DATA_STORE === 'memory' ? true : mongoose.connection.readyState === 1);
+const healthCheck = async () => {
+  if (config.DATA_STORE === 'memory') return true;
+  if (mongoose.connection.readyState !== 1) return false;
+  await mongoose.connection.db.command({ ping: 1 }, { timeoutMS: 3000 });
+  return true;
+};
 const app = createApp({ config, repos, healthCheck });
 
 const server = app.listen(config.PORT, () => {

@@ -57,6 +57,7 @@ export class MongoRepository {
   /** Insert or update the single document that matches `filter`. */
   async upsert(filter, patch) {
     const f = toMongoFilter(filter);
+    if (!f) return null;
     const doc = await this.Model.findOneAndUpdate(
       f,
       { $set: patch }, // equality fields in the filter are copied in on insert

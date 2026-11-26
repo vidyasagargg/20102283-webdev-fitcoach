@@ -22,6 +22,7 @@ async function request(method, url, body) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 20000);
   let res;
+  let data;
   try {
     res = await fetch(`/api${url}`, {
       method,
@@ -35,17 +36,22 @@ async function request(method, url, body) {
       },
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
+    if (res.status === 204) return null;
+    if (res.headers.get('content-type')?.includes('application/json')) {
+      data = await res.json();
+    }
   } catch (err) {
-    throw new ApiError(0, err.name === 'AbortError' ? 'The server took too long to respond.' : 'You appear to be offline.');
+    if (err.name === 'AbortError') throw new ApiError(0, 'The server took too long to respond.');
+    if (res) throw new ApiError(res.status, 'The API returned an unreadable response.');
+    throw new ApiError(0, 'Could not reach the server. Check your connection and try again.');
   } finally {
     clearTimeout(timer);
   }
-  if (res.status === 204) return null;
-  const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     if (res.status === 401 && !url.startsWith('/auth/')) onUnauthorized();
-    throw new ApiError(res.status, data.error ?? `Request failed (${res.status})`, data.fields);
+    throw new ApiError(res.status, data?.error ?? `Request failed (${res.status})`, data?.fields);
   }
+  if (data === undefined) throw new ApiError(res.status, 'The API returned an unexpected response. Check the API routing configuration.');
   return data;
 }
 
