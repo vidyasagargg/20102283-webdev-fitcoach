@@ -14,6 +14,8 @@ const schema = z.object({
   JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters').optional(),
   JWT_EXPIRES_IN: z.string().default('7d'),
   CLIENT_ORIGIN: z.string().default('http://localhost:5173'),
+  // Proxies in front of the API: 1 = Render only, 2 = Vercel then Render. Used to find each user's real IP for rate limiting.
+  TRUST_PROXY: z.coerce.number().int().min(0).max(5).default(1),
   // External web services
   USDA_API_KEY: z.string().default('DEMO_KEY'),
   USDA_API_URL: z.string().url().default('https://api.nal.usda.gov/fdc/v1'),

@@ -36,7 +36,8 @@ import { createProgressService } from './services/progress.service.js';
 export function createApp({ config, repos, usda, aiCoach, healthCheck = async () => true }) {
   const app = express();
   app.disable('x-powered-by');
-  app.set('trust proxy', 1); // behind Render/Heroku-style proxy: correct client IPs for rate limiting
+  //app.set('trust proxy', 1); // behind Render/Heroku-style proxy: correct client IPs for rate limiting
+  app.set('trust proxy', config.TRUST_PROXY); // proxies in front of us (Render = 1, Vercel + Render = 2): real client IPs for rate limiting
 
   // ---- services (composition root) ----
   const dayData = createDayDataService(repos);

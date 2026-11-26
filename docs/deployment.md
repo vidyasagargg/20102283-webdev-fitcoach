@@ -75,6 +75,15 @@ Then sign in with `demo@fitcoach.app`, `priya@fitcoach.app`, `arjun@fitcoach.app
 - **Free-tier cold start:** Render free services sleep after 15 minutes idle; the first request takes ~30–50 s.
   Open the app a minute before your demo.
 
+
+## Alternative: front end on Vercel, API on Render
+
+The recommended set-up is one Render service (above). If the React app must be hosted on Vercel:
+
+- `client/vercel.json` forwards every `/api/...` request to the Render service, so the browser still sees one site. The login cookie stays first-party, and `SameSite=Strict` keeps working.
+- Vercel project settings: **Root Directory** `client`, **Framework** Vite, **Build Command** `npm run build`, **Output Directory** `dist`.
+- On Render, set `CLIENT_ORIGIN` to the Vercel address, and `TRUST_PROXY` to `2` (Vercel, then Render's own proxy), so rate limits use each user's real IP address.
+
 ## Alternative: Docker
 
 ```bash
