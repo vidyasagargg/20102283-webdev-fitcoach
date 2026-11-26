@@ -66,6 +66,7 @@ Each supports `GET /?date=` or `GET /?from=&to=`, `GET /:id`, `POST /`, `PUT /:i
 | GET | `/admin/stats` | Admin role only: document counts, no personal data |
 | GET | `/admin/users` | Admin role only. Paginated account summaries with optional exact `email` and `page` query parameters |
 | GET | `/admin/users/:id` | Admin role only. Account summary and counts of associated activity records |
+| GET | `/admin/users/:id/details/:section` | Admin role only. Read-only `profile` with effective settings, or paginated `workouts`, `meals`, `water`, `daily`, `measurements`, or `reviews`. Activity pages accept `page` and contain up to 25 records |
 | POST | `/admin/users/:id/actions` | Admin role only. `action` is `suspend`, `reactivate`, or `revoke-sessions`. Applies to regular accounts |
 | GET | `/health` | Liveness and database status (used by Render) |
 

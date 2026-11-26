@@ -37,7 +37,8 @@ export class MongoRepository {
   async find(filter = {}, { sort = { date: 1 }, limit = 0, skip = 0 } = {}) {
     const f = toMongoFilter(filter);
     if (!f) return [];
-    const docs = await this.Model.find(f).sort(sort).skip(skip).limit(limit).lean();
+    const mongoSort = Object.fromEntries(Object.entries(sort).map(([field, direction]) => [field === 'id' ? '_id' : field, direction]));
+    const docs = await this.Model.find(f).sort(mongoSort).skip(skip).limit(limit).lean();
     return docs.map(toPlain);
   }
 

@@ -239,6 +239,34 @@ main {
 .admin-email {
   overflow-wrap: anywhere;
 }
+.admin-member-details {
+  border-top: 1px solid var(--border);
+  margin-top: 16px;
+  padding-top: 14px;
+}
+.admin-member-details .field {
+  max-width: 26rem;
+  margin-block: 10px;
+}
+.admin-detail-record {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.admin-detail-record summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.admin-detail-fields {
+  margin: 6px 0;
+  overflow-wrap: anywhere;
+}
+.admin-detail-fields dt {
+  font-weight: 600;
+}
+.admin-detail-fields dd {
+  margin: 0 0 8px 12px;
+  white-space: pre-wrap;
+}
 .eyebrow {
   font-size: 0.8rem;
   font-weight: 600;

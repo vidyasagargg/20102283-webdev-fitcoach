@@ -163,6 +163,37 @@ describe('security controls', () => {
     await login().expect(200);
   });
 
+  it('gives only administrators read-only access to the selected member’s details', async () => {
+    const member = await signedInAgent(app);
+    const other = await signedInAgent(app);
+    const admin = await signedInAgent(app);
+    await repos.users.updateOne({ id: admin.user.id }, { role: 'admin' });
+    await api(member.agent).put('/api/profile', { profile: { dietNotes: 'Member profile note' } }).expect(200);
+    await repos.water.create({ userId: other.user.id, date: '2026-10-12', ml: 999 });
+    for (let day = 1; day <= 26; day++) {
+      await repos.water.create({ userId: member.user.id, date: `2026-10-${String(day).padStart(2, '0')}`, ml: 250 });
+    }
+    const path = `/api/admin/users/${member.user.id}/details`;
+    await request(app).get(`${path}/profile`).expect(401);
+    await member.agent.get(`${path}/profile`).expect(403);
+    await other.agent.get(`${path}/water`).expect(403);
+    const profile = await admin.agent.get(`${path}/profile`).expect(200);
+    expect(profile.headers['cache-control']).toBe('no-store');
+    expect(profile.body).toEqual({ profile: expect.objectContaining({
+      dietNotes: 'Member profile note', targets: expect.objectContaining({ waterMl: 3000 }),
+    }) });
+    expect(JSON.stringify(profile.body)).not.toMatch(/passwordHash|tokenVersion/);
+    const first = await admin.agent.get(`${path}/water`).expect(200);
+    expect(first.body).toMatchObject({ page: 1, pageSize: 25, total: 26 });
+    expect(first.body.records).toHaveLength(25);
+    expect(first.body.records.every((entry) => entry.userId === member.user.id)).toBe(true);
+    const second = await admin.agent.get(`${path}/water?page=2`).expect(200);
+    expect(second.body.records).toMatchObject([{ date: '2026-10-01', ml: 250 }]);
+    await admin.agent.get(`${path}/users`).expect(400);
+    await admin.agent.get(`${path}/water?page=0`).expect(400);
+    await api(admin.agent).put(`${path}/profile`, { dietNotes: 'Edited by admin' }).expect(404);
+  });
+
   it('returns JSON 400 for malformed JSON', async () => {
     const res = await request(app)
       .post('/api/auth/login')

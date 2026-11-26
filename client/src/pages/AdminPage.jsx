@@ -3,6 +3,7 @@ import { api } from '../api/client.js';
 import { Button, Card, ErrorState, Field, Loader, Stat } from '../components/ui.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useApi } from '../hooks/useApi.js';
+import AdminMemberDetails from '../components/AdminMemberDetails.jsx';
 
 const labels = {
   users: 'Accounts', workouts: 'Workouts', meals: 'Meals', water: 'Water entries',
@@ -56,6 +57,7 @@ function AccountSupport({ id, onUpdated }) {
       </>}
     </div>
     {feedback && <p role={feedback.error ? 'alert' : 'status'}>{feedback.message}</p>}
+    <AdminMemberDetails id={id} />
   </Card>;
 }
 
